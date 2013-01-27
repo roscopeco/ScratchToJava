@@ -72,22 +72,23 @@ public class Main {
   }
   
   public static void main(String[] args) throws Exception {
-    if (args.length < 2 || args.length > 3) {
-      System.out.println("Usage: scratch2java <scratch project file> <output base package> [outputDir=gen]");
+    if (args.length < 2 || args.length > 4) {
+      System.out.println("Usage: scratch2java <scratch project file> <output base package> [codeDir=./gen] [resDir=./res]");
       System.exit(-1);
     }
     String outputPackage = args[1];
-    String outputDir = (args.length == 3) ? args[2] : "gen";    
+    String outputDir = (args.length > 2) ? args[2] : "gen";
+    String resDir = (args.length > 3) ? args[3] : "res";
     
     ScratchProject project = ScratchProject.readProject(args[0]);
     
     //dumpCode(project.getStage());
     
-    CodeGenerator gen = new CodeGenerator(outputDir, outputPackage, project.getStage());
+    CodeGenerator gen = new CodeGenerator(outputDir, outputPackage, resDir, project.getStage());
     gen.generate();
     
     for (ScratchSpriteMorph sprite : project.getStage().sprites()) {
-      gen = new CodeGenerator(outputDir, outputPackage, sprite);      
+      gen = new CodeGenerator(outputDir, outputPackage, resDir, sprite);      
       gen.generate();
     }
   }

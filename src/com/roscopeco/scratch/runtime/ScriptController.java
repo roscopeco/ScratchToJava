@@ -1,74 +1,44 @@
 package com.roscopeco.scratch.runtime;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
-public class ScriptController {  
+public abstract class ScriptController {  
   private static ScriptController instance;  
+
+  public static void registerInstance(ScriptController _instance) {
+    instance = _instance;
+  }
   
-  /* TODO this will become a factory that supplies different 
-   * instances depending on the runtime being used (Java, Android, etc).
-   */
   public static ScriptController getInstance() {
     if (instance == null) {
-      instance = new ScriptController();
+      throw new IllegalStateException("No MediaManager instance is registered");
     }
     
     return instance;    
   }
+    
+  protected ScriptController() { }  
   
-  private final HashMap<String, Object> vars = new HashMap<String, Object>();  
-  private final ArrayList<AbstractScript> startScripts;
+  public abstract void registerStartScript(AbstractScript script);
   
-  private ScriptController() {
-    startScripts = new ArrayList<AbstractScript>();    
-  }  
+  public abstract void registerKeyEventReceiver(String keyName, AbstractScript script);
   
-  public void registerStartScript(AbstractScript script) {
-    startScripts.add(script);    
-  }
+  public abstract void registerBroadcastReceiver(String broadcast, AbstractScript script);
   
-  public void registerKeyEventReceiver(String keyName, AbstractScript script) {
-    // TODO implement    
-  }
+  public abstract void registerMouseClickEventReceiver(AbstractScript script);
   
-  public void registerBroadcastReceiver(String broadcast, AbstractScript script) {
-    // TODO implement
-  }
+  public abstract void broadcast(String name);
   
-  public void broadcast(String name) {
-    // TODO implement
-  }
+  public abstract void stopAllSounds();
   
-  public void stopAllSounds() {
-    // TODO implement
-  }
+  public abstract void setVar(String name, Object value);  
+
+  public abstract Object getVar(String name);
   
-  // TODO vars could eventually become straight inst vars on a generated
-  // subclass of controller, or a global Binding object or something...
-  public void setVar(String name, Object value) {
-    vars.put(name, value);
-  }
+  public abstract boolean checkKeyPress(String keyname);
   
-  public Object getVar(String name) {
-    return vars.get(name);
-  }
+  public abstract void start();
   
-  public boolean checkKeyPress(String keyname) {
-    // TODO implement
-    return false;
-  }
+  public abstract void stopAll();
   
-  public void start() {
-    // TODO run startups, start looper.
-  }
-  
-  public void stopAll() {
-    // TODO implement
-  }
-  
-  public boolean allStopped() {
-    // TODO implement
-    return false;
-  }
+  public abstract boolean allStopped();
 }

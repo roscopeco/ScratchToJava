@@ -3,6 +3,7 @@ package com.roscopeco.scratch.runtime;
 public abstract class AbstractSprite extends MediaScriptable {
   final AbstractStage stage;
   int x, y;
+  Costume costume;
   
   protected AbstractSprite(AbstractStage owner) {
     this.stage = owner;    
@@ -68,23 +69,15 @@ public abstract class AbstractSprite extends MediaScriptable {
     // TODO implement
   }
   
-  public String costume() {
-    // TODO implement
-    return null;
+  public Costume costume() {
+    return costume;
   }
   
-  public void setCostume(String name) {
-    // TODO implement
+  public void setCostume(Costume costume) {
+    this.costume = costume;
   }
   
-  public int costumeIndex() {
-    // TODO implement;
-    return -1;
-  }
-  
-  public void nextCostume() {
-    // TODO implement
-  }
+  public abstract void nextCostume();
   
   public void think(String text, long millis) {
     // TODO implement
