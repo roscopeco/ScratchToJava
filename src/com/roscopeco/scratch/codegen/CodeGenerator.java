@@ -326,12 +326,12 @@ public class CodeGenerator {
       try {
         Integer.parseInt(o.toString());
         //System.out.println("  Parsed as int");
-        varTypes.put(name, long.class);
+        varTypes.put(name, Long.class);
       } catch (NumberFormatException e) {
         try {
           Double.parseDouble(o.toString());
           //System.out.println("  Parsed as double");
-          varTypes.put(name, double.class);
+          varTypes.put(name, Double.class);
         } catch (NumberFormatException f) {
           //System.out.println("  Defaulting to String");
           varTypes.put(name, String.class);        
@@ -343,8 +343,8 @@ public class CodeGenerator {
   String getVarType(String name) {
     Class<?> clz = varTypes.get(name);
     if (clz == null) {
-      // TODO default to int for now, maybe revisit later?
-      varTypes.put(name, int.class);
+      // TODO default to long for now, maybe revisit (again) later?
+      varTypes.put(name, Long.class);
       return int.class.getName();
     } else {
       return clz.getName();
