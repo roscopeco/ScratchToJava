@@ -355,7 +355,7 @@ public class ObjectCodeGenerator {
     if (clz == null) {
       // TODO default to long for now, maybe revisit (again) later?
       varTypes.put(name, Long.class);
-      return int.class.getName();
+      return Long.class.getName();
     } else {
       return clz.getName();
     }
