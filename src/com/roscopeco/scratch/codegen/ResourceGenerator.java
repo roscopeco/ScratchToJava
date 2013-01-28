@@ -16,6 +16,13 @@ import com.roscopeco.scratch.io.objects.ScratchStageMorph;
 import com.roscopeco.scratch.io.objects.ScriptableScratchMorph;
 import com.roscopeco.scratch.io.objects.SoundMedia;
 
+/**
+ * As well as generating the resource files, this also generates
+ * the public static final vars in the Sprite classes with the
+ * resource handles.
+ * 
+ * @author rosco
+ */
 public class ResourceGenerator {
   private final String resDir;
   private final String codeDir;
@@ -98,7 +105,7 @@ public class ResourceGenerator {
   }
   
   void processImage(int index, StringBuilder mainSb, String objName, ImageMedia media, File dir) throws IOException {
-    String varname = ObjectCodeGenerator.scratchNameToIdentifier(media.mediaName().toString());
+    String varname = ObjectCodeGenerator.scratchNameToIdentifier(media.mediaName().toString(), false);
     String imageName = null;
     
     // Write the image file

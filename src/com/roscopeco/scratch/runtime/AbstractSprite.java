@@ -4,6 +4,7 @@ public abstract class AbstractSprite extends MediaScriptable {
   final AbstractStage stage;
   int x, y;
   Costume costume;
+  boolean visible = true;
   
   protected AbstractSprite(AbstractStage owner) {
     this.stage = owner;    
@@ -62,11 +63,15 @@ public abstract class AbstractSprite extends MediaScriptable {
   }
   
   public void show() {
-    // TODO implement
+    visible = true;
   }
   
   public void hide() {
-    // TODO implement
+    visible = false;
+  }
+  
+  public boolean visible() {
+    return visible;
   }
   
   public Costume costume() {

@@ -148,6 +148,7 @@ public class ObjectCodeGenerator {
       // sprite needs a constructor
       mainSb.append("  public ").append(clz).append("(AbstractStage owner) {\n");
       mainSb.append("    super(owner);\n");
+      mainSb.append("    setCostume(").append(scratchNameToIdentifier(sprite.costume().mediaName().toString(), false)).append(");\n");
       mainSb.append("  }\n\n");
     }
   }
@@ -519,7 +520,7 @@ public class ObjectCodeGenerator {
     } else if ("hide".equals(type.symbol())) {
       scriptSb.append(indent).append("target.hide()");      
     } else if ("lookLike:".equals(type.symbol())) {
-      scriptSb.append(indent).append("target.setCostume(").append(mainClassName).append(".").append(scratchNameToIdentifier(stmt.get(1).toString())).append(")");
+      scriptSb.append(indent).append("target.setCostume(").append(mainClassName).append(".").append(scratchNameToIdentifier(stmt.get(1).toString(), false)).append(")");
     } else if ("nextCostume".equals(type.symbol())) {
       scriptSb.append(indent).append("target.nextCostume()");
     } else if ("costumeIndex".equals(type.symbol())) {
