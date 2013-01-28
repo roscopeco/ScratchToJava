@@ -14,16 +14,24 @@ import com.roscopeco.scratch.io.objects.ScratchSpriteMorph;
 import com.roscopeco.scratch.io.objects.ScratchStageMorph;
 import com.roscopeco.scratch.io.objects.Symbol;
 
-public class CodeGenerator {
+public class ObjectCodeGenerator {
   static final Pattern FIRSTISDIGIT = Pattern.compile("^[0-9]");
   static final Pattern ALLVALIDCHARS = Pattern.compile("[^0-9a-zA-Z_]");
   
   static String scratchNameToIdentifier(String scratchName) {
+    return scratchNameToIdentifier(scratchName, true);
+  }
+  
+  static String scratchNameToIdentifier(String scratchName, boolean isClass) {
     String ivarname = ALLVALIDCHARS.matcher(scratchName).replaceAll("");
     if (FIRSTISDIGIT.matcher(scratchName).matches()) {
       return "_" + ivarname;
     } else {
-      return ivarname;
+      if (isClass) {
+        return Character.toUpperCase(ivarname.charAt(0)) + ivarname.substring(1);
+      } else {
+        return Character.toLowerCase(ivarname.charAt(0)) + ivarname.substring(1);        
+      }
     }
   }
   
@@ -36,7 +44,7 @@ public class CodeGenerator {
   private final boolean withRes;  
   private final String mainClassName;
     
-  public CodeGenerator(String codeDir, String pkg, String resDir, ScratchStageMorph stage) {
+  public ObjectCodeGenerator(String codeDir, String pkg, String resDir, ScratchStageMorph stage) {
     this.codeDir = codeDir;
     this.resDir = resDir;
     this.pkg = pkg;
@@ -47,7 +55,7 @@ public class CodeGenerator {
     this.mainClassName = scratchNameToIdentifier(stage.objName().toString());
   }
   
-  public CodeGenerator(String codeDir, String pkg, String resDir, ScratchSpriteMorph sprite) {
+  public ObjectCodeGenerator(String codeDir, String pkg, String resDir, ScratchSpriteMorph sprite) {
     this.codeDir = codeDir;
     this.resDir = resDir;
     this.pkg = pkg;
@@ -58,7 +66,7 @@ public class CodeGenerator {
     this.mainClassName = scratchNameToIdentifier(sprite.objName().toString());
   }
   
-  public CodeGenerator(String codeDir, String pkg, ScratchStageMorph stage) {
+  public ObjectCodeGenerator(String codeDir, String pkg, ScratchStageMorph stage) {
     this.codeDir = codeDir;
     this.withRes = false;
     this.resDir = null;
@@ -69,7 +77,7 @@ public class CodeGenerator {
     this.mainClassName = scratchNameToIdentifier(stage.objName().toString());
   }
   
-  public CodeGenerator(String codeDir, String pkg, ScratchSpriteMorph sprite) {
+  public ObjectCodeGenerator(String codeDir, String pkg, ScratchSpriteMorph sprite) {
     this.codeDir = codeDir;
     this.withRes = false;
     this.resDir = null;
@@ -233,6 +241,7 @@ public class CodeGenerator {
     scriptSb.append("import com.roscopeco.scratch.runtime.AbstractScript;\n");
     scriptSb.append("import com.roscopeco.scratch.runtime.Abstract").append(stageScript ? "Stage" : "Sprite").append(";\n");
     scriptSb.append("import com.roscopeco.scratch.runtime.ScriptController;\n\n");
+    scriptSb.append("import ").append(pkg).append(".Objects;\n");
     scriptSb.append("import ").append(pkg).append(".sprites.").append(ownerName).append(";\n\n");
     
     scriptSb.append("public final class ").append(clz).append(" extends AbstractScript {\n");
@@ -464,7 +473,7 @@ public class CodeGenerator {
       if (stmt.size() == 1 || stmt.get(2) == this.sprite) {
         scriptSb.append(indent).append("target.");
       } else {
-        scriptSb.append(indent).append(stageScript ? "" : "target.stage().").append("findSprite(\"").append(((ScratchSpriteMorph)stmt.get(2)).objName()).append("\").");
+        scriptSb.append(indent).append("Objects.").append(scratchNameToIdentifier(((ScratchSpriteMorph)stmt.get(2)).objName().string(), false)).append(".");
       }
       String attr = stmt.get(1).toString();
       if ("x position".equals(attr)) {
@@ -479,7 +488,7 @@ public class CodeGenerator {
         // should never happen? Makes no sense in any event (would always be true)
         scriptSb.append(indent).append("target.");
       } else {
-        scriptSb.append(indent).append(stageScript ? "" : "target.stage().").append("findSprite(\"").append(((ScratchSpriteMorph)stmt.get(1)).objName()).append("\").");
+        scriptSb.append(indent).append("Objects.").append(scratchNameToIdentifier(((ScratchSpriteMorph)stmt.get(1)).objName().string(), false)).append(".");
       }
       scriptSb.append("touching(target)");
     } else if ("xpos".equals(type.symbol())) {
@@ -500,7 +509,7 @@ public class CodeGenerator {
     } else if ("gotoSpriteOrMouse:".equals(type.symbol())) {
       // TODO not implementing mouse yet - not sure what argument will be?
       if (stmt.get(1) instanceof ScratchSpriteMorph) {
-        scriptSb.append(indent).append("AbstractSprite goingTo = ").append(stageScript ? "" : "target.stage().").append("findSprite(\"").append(((ScratchSpriteMorph)stmt.get(1)).objName()).append("\");\n");
+        scriptSb.append(indent).append("AbstractSprite goingTo = ").append("Objects.").append(scratchNameToIdentifier(((ScratchSpriteMorph)stmt.get(1)).objName().string(), false)).append(";\n");
         scriptSb.append(indent).append("target.setXY(goingTo.x(), goingTo.y())");
       } else {
         throw new UnsupportedOperationException("gotoMouse is not yet supported");

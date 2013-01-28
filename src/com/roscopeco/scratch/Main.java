@@ -1,6 +1,6 @@
 package com.roscopeco.scratch;
 
-import com.roscopeco.scratch.codegen.CodeGenerator;
+import com.roscopeco.scratch.codegen.ProjectCodeGenerator;
 import com.roscopeco.scratch.io.ScratchProject;
 import com.roscopeco.scratch.io.objects.Array;
 import com.roscopeco.scratch.io.objects.OrderedCollection;
@@ -84,12 +84,6 @@ public class Main {
     
     //dumpCode(project.getStage());
     
-    CodeGenerator gen = new CodeGenerator(outputDir, outputPackage, resDir, project.getStage());
-    gen.generate();
-    
-    for (ScratchSpriteMorph sprite : project.getStage().sprites()) {
-      gen = new CodeGenerator(outputDir, outputPackage, resDir, sprite);      
-      gen.generate();
-    }
+    new ProjectCodeGenerator(project, outputDir, outputPackage, resDir).generate();    
   }
 }

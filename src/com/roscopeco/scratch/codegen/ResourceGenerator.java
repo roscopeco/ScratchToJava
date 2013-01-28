@@ -98,7 +98,7 @@ public class ResourceGenerator {
   }
   
   void processImage(int index, StringBuilder mainSb, String objName, ImageMedia media, File dir) throws IOException {
-    String varname = CodeGenerator.scratchNameToIdentifier(media.mediaName().toString());
+    String varname = ObjectCodeGenerator.scratchNameToIdentifier(media.mediaName().toString());
     String imageName = null;
     
     // Write the image file
