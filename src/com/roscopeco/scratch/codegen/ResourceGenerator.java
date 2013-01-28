@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -89,27 +90,24 @@ public class ResourceGenerator {
     }    
   }
   
+  static final Pattern NOTAZ09USCORE = Pattern.compile("[^a-z0-9_]");
+  
+  String imageFilename(String objName, String mediaName, String ext) {
+    return NOTAZ09USCORE.matcher(objName.toLowerCase()).replaceAll("_") + "_" +
+           NOTAZ09USCORE.matcher(mediaName.toLowerCase()).replaceAll("_") + ext;
+  }
+  
   void processImage(int index, StringBuilder mainSb, String objName, ImageMedia media, File dir) throws IOException {
-    String imageName = objName + "_" + media.mediaName().toString();
     String varname = CodeGenerator.scratchNameToIdentifier(media.mediaName().toString());
-    
-    // Add code to load the image in the object's class.    
-    mainSb.append("  public static final Costume ").
-        append(varname).
-        append(" = MediaManager.instance().loadImage(").
-            append(index + 1).
-            append(", \"").append(media.mediaName().toString()).append("\", \"").
-            append(imageName).append(".png\");\n");
-    
-    // Add this element to the array instance var
-    arraySb.append("    ").append(varname).append(",\n");
+    String imageName = null;
     
     // Write the image file
     if (media.jpegBytes() != null) {
       // Write JPEG
+      imageName = imageFilename(objName, media.mediaName().toString(), ".jpg");
       FileOutputStream fos = null;
       try {
-        fos = new FileOutputStream(new File(dir, imageName + ".jpg"));
+        fos = new FileOutputStream(new File(dir, imageName));
         fos.write(media.jpegBytes().bytes());
       } finally {
         if (fos != null) fos.close();
@@ -120,21 +118,33 @@ public class ResourceGenerator {
       if (media.compositeForm() != null) {
         f = media.compositeForm();
       } else if (media.form() != null) { 
-        f = media.compositeForm();
+        f = media.form();
       } else {
         throw new UnsupportedOperationException("Media with unsupported image type (" + media.mediaName() + ")");      
+      }      
+
+      imageName = imageFilename(objName, media.mediaName().toString(), ".png");
+      BufferedImage img = f.getImage();
+      if (img == null) {
+        System.err.println("Warning: no image for " + media.mediaName());
+      } else {
+        File imgFile = new File(dir, imageName);
+        ImageIO.write(img, "png", imgFile);
       }
+    }
+
+    if (imageName != null) {
+      // Add code to load the image in the object's class.    
+      mainSb.append("  public static final Costume ").
+          append(varname).
+          append(" = MediaManager.instance().loadImage(").
+              append(index + 1).
+              append(", \"").append(media.mediaName().toString()).append("\", \"").
+              append(imageName).append("\");\n");
       
-      if (f != null) {
-        BufferedImage img = media.compositeForm().getImage();
-        if (img == null) {
-          System.err.println("Warning: no image for " + media.mediaName());
-        } else {
-          File imgFile = new File(dir, imageName + ".png");
-          ImageIO.write(img, "png", imgFile);
-        }
-      }
-    }    
+      // Add this element to the array instance var
+      arraySb.append("    ").append(varname).append(",\n");
+    }
   }
   
   void processSound(StringBuilder mainSb, String objName, SoundMedia media, File dir) {
