@@ -257,9 +257,20 @@ public class ObjectCodeGenerator {
     // Run method
     scriptSb.append("  @Override\n");
     scriptSb.append("  public void run() {\n");
+    scriptSb.append("    try {\n");
+    scriptSb.append("      try {\n");
+    scriptSb.append("        Objects.globalLock.lockInterruptibly();\n");
+    scriptSb.append("      } catch (InterruptedException e) {\n");
+    scriptSb.append("        return;\n");
+    scriptSb.append("      }\n\n");
 
     generateRunBody(scriptSb, code);
     
+    scriptSb.append("    } finally {\n");
+    scriptSb.append("      if (Objects.globalLock.isHeldByCurrentThread()) {\n");
+    scriptSb.append("        Objects.globalLock.unlock();\n");
+    scriptSb.append("      }\n");
+    scriptSb.append("    }\n");
     scriptSb.append("  }\n");
     scriptSb.append("}\n");
 
@@ -368,6 +379,23 @@ public class ObjectCodeGenerator {
     generateStatement(indentLvl, scriptSb, stmt, true);
   }
   
+  void generateCriticalLock(StringBuilder sb, String indent) {
+    sb.append(indent).append("if (!Objects.globalLock.isHeldByCurrentThread()) {\n");
+    sb.append(indent).append("  try {\n");
+    sb.append(indent).append("    Objects.globalLock.lockInterruptibly();\n");
+    sb.append(indent).append("  } catch (InterruptedException e) {\n");
+    sb.append(indent).append("    return;\n");
+    sb.append(indent).append("  }\n");
+    sb.append(indent).append("}\n\n");
+  }
+  
+  void generateCriticalUnlock(StringBuilder sb, String indent) {
+    sb.append(indent).append("if (Objects.globalLock.isHeldByCurrentThread()) {\n");
+    sb.append(indent).append("  Objects.globalLock.unlock();\n");
+    sb.append(indent).append("}\n");
+    sb.append(indent).append("Thread.yield();\n");
+  }
+  
   /* 
    * Generates an individual statement (or block, in the case of doUntil etc). in the run body.
    * 
@@ -399,10 +427,16 @@ public class ObjectCodeGenerator {
     } else if ("wait:elapsed:from:".equals(type.symbol())) {
       // TODO not supporting from yet
       scriptSb.append(indent).append("try {\n");
+      scriptSb.append(indent).append("  Objects.globalLock.unlock();\n");
       scriptSb.append(indent).append("  Thread.sleep((long)(").append(stmt.get(1)).append(" * 1000));\n");
-      scriptSb.append(indent).append("} catch (InterruptedException e) { /* do nothing */ }");
+      scriptSb.append(indent).append("  Objects.globalLock.lockInterruptibly();\n");
+      scriptSb.append(indent).append("} catch (InterruptedException e) {\n");
+      scriptSb.append(indent).append("  return;\n");
+      scriptSb.append(indent).append("}\n\n");
+      statement = false;    // don't generate a semicolon...
     } else if ("keyPressed:".equals(type.symbol())) {
       scriptSb.append(indent).append("controller().checkKeyPress(\"").append(stmt.get(1)).append("\")");
+    
     // MEDIA
     } else if ("showBackground:".equals(type.symbol())) {
       scriptSb.append(indent).append("target.showBackground(\"").append(stmt.get(1)).append("\")");      
@@ -431,21 +465,27 @@ public class ObjectCodeGenerator {
     } else if ("doRepeat".equals(type.symbol())) {
       String loopVar = mkLoopVar(indentLvl);
       scriptSb.append(indent).append("for (int ").append(loopVar).append(" = 0; ").append(loopVar).append(" < ").append(stmt.get(1)).append("; ").append(loopVar).append("++) {\n");
-      generateNestedBlock(indentLvl + 1, scriptSb, (Array<Array<ScratchObject>>)stmt.get(2));      
+      generateCriticalLock(scriptSb, indent + "  ");
+      generateNestedBlock(indentLvl + 1, scriptSb, (Array<Array<ScratchObject>>)stmt.get(2));
+      generateCriticalUnlock(scriptSb, indent + "  ");
       scriptSb.append(indent).append("}\n\n");
       statement = false;  // hack to stop semicolon being generated for us!
     } else if ("doUntil".equals(type.symbol())) {
       scriptSb.append(indent).append("while (!(").append(processArg(stmt.get(1))).append(")) {\n");
+      generateCriticalLock(scriptSb, indent + "  ");
       generateNestedBlock(indentLvl + 1, scriptSb, (Array<Array<ScratchObject>>)stmt.get(2));
+      generateCriticalUnlock(scriptSb, indent + "  ");
       scriptSb.append(indent).append("}\n\n");
       statement = false;  // hack to stop semicolon being generated for us!
     } else if ("doForever".equals(type.symbol())) {
       scriptSb.append(indent).append("while (!controller().allStopped()) {\n");
+      generateCriticalLock(scriptSb, indent + "  ");
       generateNestedBlock(indentLvl + 1, scriptSb, (Array<Array<ScratchObject>>)stmt.get(1));
+      generateCriticalUnlock(scriptSb, indent + "  ");
       scriptSb.append(indent).append("}\n\n");
       statement = false;  // hack to stop semicolon being generated for us!
     } else if ("doReturn".equals(type.symbol())) {
-      scriptSb.append(indent).append("break");
+      scriptSb.append(indent).append("return");
       
     // VARS  
     } else if ("hideVariable:".equals(type.symbol())) {
