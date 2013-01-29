@@ -29,7 +29,7 @@
 	</target>
 
 	<target name="compile-main" description="Compile the main code" depends="_make-bindirs">
-		<javac destdir="${main.classes.dir}" includeantruntime="false" classPath="../ScratchFileReader/bin">
+		<javac destdir="${main.classes.dir}" includeantruntime="false" classPath="../ScratchFileReader/bin" source="1.6" target="1.6">
 			<src path="${main.src.dir}"/>
 		</javac>
 	</target>
