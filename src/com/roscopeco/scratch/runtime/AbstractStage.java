@@ -1,11 +1,6 @@
 package com.roscopeco.scratch.runtime;
 
 public abstract class AbstractStage extends MediaScriptable {
-  public AbstractSprite findSprite(String name) {
-    // TODO implement
-    return null;
-  }
-  
   public void showBackground(String background) {
     // TODO implement
   }
