@@ -149,6 +149,16 @@ public class ObjectCodeGenerator {
       mainSb.append("  public ").append(clz).append("(AbstractStage owner) {\n");
       mainSb.append("    super(owner);\n");
       mainSb.append("    setCostume(").append(scratchNameToIdentifier(sprite.costume().mediaName().toString(), false)).append(");\n");
+
+      // compute location and size
+      int x = sprite.bounds().x1().intValue();
+      int y = sprite.bounds().y1().intValue();
+      int w = sprite.bounds().x2().intValue() - x;
+      int h = sprite.bounds().y2().intValue() - y;
+      
+      mainSb.append("    setXY(").append(x).append(", ").append(y).append(");\n");
+      mainSb.append("    setWH(").append(w).append(", ").append(h).append(");\n");
+      mainSb.append("    setHeading(").append(sprite.rotationDegrees().intValue()).append(");\n");
       mainSb.append("  }\n\n");
     }
   }
@@ -219,7 +229,8 @@ public class ObjectCodeGenerator {
     } else if (":MouseClickEventHatMorph".equals(hatType.toString())) {
       mainSb.append("    controller().registerMouseClickEventReceiver(new ").append(pkg).append(".scripts.").append(scriptName).append("(this, controller()));\n\n");
     } else {
-      throw new IllegalArgumentException("Unsupported hat type: " + hatType);
+      System.err.println("WARNING: Skipping script with unsupported hat type: " + hatType);
+      mainSb.append("    // skipped: unsupported hat type (probably script with no hat?\n");
     }
   }
   
@@ -227,7 +238,7 @@ public class ObjectCodeGenerator {
    * Generates the footer for the registerScripts method.
    */
   void generateRegisterFooter(StringBuilder mainSb) {
-    mainSb.append("  }\n");    
+    mainSb.append("  }\n\n");    
   }  
   
   /*

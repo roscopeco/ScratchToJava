@@ -2,12 +2,16 @@ package com.roscopeco.scratch.runtime;
 
 public abstract class AbstractSprite extends MediaScriptable {
   final AbstractStage stage;
+  double rotationD;    /* degrees */
+  double rotationR;    /* radians */
   int x, y;
+  int w, h;
   Costume costume;
   boolean visible = true;
   
   protected AbstractSprite(AbstractStage owner) {
-    this.stage = owner;    
+    this.stage = owner;
+    setHeading(90); 
   }
   
   public AbstractStage stage() {
@@ -30,29 +34,60 @@ public abstract class AbstractSprite extends MediaScriptable {
     this.y = y;
   }
   
+  public int w() {
+    return w;
+  }
+  
+  public void setW(int w) {
+    this.w = w;
+  }
+  
+  public int h() {
+    return h;
+  }
+  
+  public void setH(int h) {
+    this.h = h;
+  }
+  
   public void setXY(int x, int y) {
     this.x = x;
     this.y = y;
   }
   
+  public void setWH(int w, int h) {
+    this.w = w;
+    this.h = h;
+  }
+  
   public void forward(int px) {
-    // TODO implement this
+    double diry = Math.cos(rotationR);
+    double dirx = Math.sin(rotationR);
+    x = (int)(x + dirx * px);
+    y = -(int)(y + diry  * px);      
   }
   
   public void startGlideTo(int x, int y, long millis) {
     
   }
   
+  public double heading() {
+    return rotationD;
+  }
+  
   public void setHeading(double degrees) {
-    // TODO implement
+    rotationD = degrees;
+    rotationR = Math.toRadians(degrees);
   }
   
   public void turnLeft(double degrees) {
-    // TODO implement
+    rotationD = degrees = rotationD + degrees;
+    rotationR = Math.toRadians(degrees);
   }
   
   public void turnRight(double degrees) {
-    // TODO implement
+    rotationD = degrees = rotationD + degrees;
+    rotationR = Math.toRadians(degrees);
   }
   
   /**
