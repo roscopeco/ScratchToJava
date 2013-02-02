@@ -64,7 +64,7 @@ public abstract class AbstractSprite extends MediaScriptable {
     double diry = Math.cos(rotationR);
     double dirx = Math.sin(rotationR);
     x = (int)(x + dirx * px);
-    y = -(int)(y + diry  * px);      
+    y = (int)(y + diry  * px);      
   }
   
   public void startGlideTo(int x, int y, long millis) {
