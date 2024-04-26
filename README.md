@@ -1,3 +1,5 @@
+> **note**: This repository is archived and development / support is discontinued.
+
 Scratch2Java (Convert Scratch project files to Java)
 ====================================================
 
